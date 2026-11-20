@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>PrintBiz AI | Business workspace</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="#overview" aria-label="PrintBiz AI home">
+      <span class="brand-mark">P</span>
+      <span><strong>PRINTBIZ<span class="brand-accent"> AI</span></strong><small>BUSINESS WORKSPACE</small></span>
+    </a>
+    <div class="nav-label">WORKSPACE</div>
+    <nav class="navigation" aria-label="Main navigation">
+      <button class="nav-link active" data-view="overview" data-roles="admin staff"><span class="nav-icon">◫</span> Overview</button>
+      <button class="nav-link" data-view="orders" data-roles="admin staff"><span class="nav-icon">▤</span> Orders & payments</button>
+      <button class="nav-link" data-view="customers" data-roles="admin staff"><span class="nav-icon">♙</span> Customers & loyalty</button>
+      <button class="nav-link" data-view="documents" data-roles="admin staff"><span class="nav-icon">▧</span> Document studio</button>
+      <button class="nav-link" data-view="shirts" data-roles="admin staff"><span class="nav-icon">▣</span> T-shirt production</button>
+      <button class="nav-link" data-view="catalogue" data-roles="admin"><span class="nav-icon">▦</span> Services & pricing</button>
+      <button class="nav-link" data-view="inventory" data-roles="admin staff"><span class="nav-icon">▥</span> Inventory</button>
+      <button class="nav-link" data-view="finance" data-roles="admin"><span class="nav-icon">◷</span> Expenses & reports</button>
+      <button class="nav-link" data-view="activity" data-roles="admin"><span class="nav-icon">☷</span> Activity log</button>
+      <button class="nav-link" data-view="admin-users" data-roles="admin"><span class="nav-icon">♧</span> Staff accounts</button>
+      <button class="nav-link" data-view="customer" data-roles="customer"><span class="nav-icon">♙</span> Customer portal</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="shop-avatar">PB</div>
+      <div><strong id="signedInName">Print shop</strong><small id="signedInRole">Local workspace</small></div>
+      <span class="online-dot" title="Application available"></span>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <div class="mobile-brand"><span class="brand-mark">P</span><strong>PRINTBIZ<span class="brand-accent"> AI</span></strong></div>
+      <div class="breadcrumb"><span>Workspace</span><b>/</b><strong id="pageTitle">Overview</strong></div>
+      <div class="topbar-actions">
+        <span class="system-status"><i></i> Workspace online</span>
+        <span class="account-chip" id="accountChip"></span>
+        <button class="button button-quiet password-button" id="passwordButton">Password</button>
+        <button class="icon-button" id="refreshAll" aria-label="Refresh dashboard" title="Refresh">↻</button>
+        <button class="button button-quiet logout-button" id="logoutButton">Sign out</button>
+      </div>
+    </header>
+
+    <div class="page-wrap">
+      <section class="view active" id="view-overview">
+        <div class="page-heading">
+          <div><div class="eyebrow">YOUR BUSINESS AT A GLANCE</div><h1>Good business starts here.</h1><p>Manage your print shop, customers and daily operations in one place.</p></div>
+          <button class="button button-primary" data-go="orders">＋ Create an order</button>
+        </div>
+        <div class="stat-grid" id="stats"></div>
+        <div class="content-grid dashboard-grid">
+          <section class="card span-two">
+            <div class="card-heading"><div><div class="eyebrow">LATEST ACTIVITY</div><h2>Recent orders</h2></div><button class="text-button" data-go="orders">View all <span>→</span></button></div>
+            <div class="table-wrap" id="recentOrders"></div>
+          </section>
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">NEEDS ATTENTION</div><h2>Low stock</h2></div><button class="text-button" data-go="inventory">Inventory →</button></div>
+            <div id="lowStock" class="compact-list"></div>
+          </section>
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">SHORTCUTS</div><h2>Quick actions</h2></div></div>
+            <div class="quick-actions">
+              <button data-go="customers"><span>♙</span><b>Add customer</b><small>Grow your customer book</small></button>
+              <button data-go="documents"><span>▧</span><b>New document job</b><small>Upload and prepare a file</small></button>
+              <button data-go="shirts"><span>▣</span><b>T-shirt production</b><small>Track a custom order</small></button>
+              <button data-go="finance" data-roles="admin"><span>◷</span><b>View reports</b><small>Review your business activity</small></button>
+            </div>
+          </section>
+        </div>
+        <div class="notice-strip"><span>ⓘ</span><p><strong>Integration status:</strong> payments are recorded manually. Payment-provider processing, OCR, messaging, printer control, automated backups and tax configuration still need setup.</p></div>
+      </section>
+
+      <section class="view" id="view-orders">
+        <div class="page-heading"><div><div class="eyebrow">SALES & CHECKOUT</div><h1>Orders & payments</h1><p>Create a priced order, record payments and print a receipt.</p></div></div>
+        <div class="content-grid">
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">NEW SALE</div><h2>Create order</h2></div><span class="pill">Quotation</span></div>
+            <form id="orderForm" class="form-stack">
+              <label>Customer<select name="customer_id" id="customerSelect" required><option value="">Select a customer</option></select></label>
+              <div class="form-section-title">Order items <button type="button" class="text-button" id="addOrderLine">＋ Add item</button></div>
+              <div id="orderItems" class="order-lines"></div>
+              <label>Notes <textarea name="notes" rows="2" placeholder="Optional job details"></textarea></label>
+              <button class="button button-primary" type="submit">Calculate & save order</button>
+              <div id="orderMsg" class="form-message" aria-live="polite"></div>
+            </form>
+          </section>
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">PAYMENT ENTRY</div><h2>Record a payment</h2></div></div>
+            <form id="paymentForm" class="form-stack">
+              <label>Order<select name="order_id" id="paymentOrder" required><option value="">Select an outstanding order</option></select></label>
+              <div class="two-col">
+                <label>Amount (K)<input name="amount" type="number" min="0.01" step="0.01" required></label>
+                <label>Method<select name="method" required><option value="cash">Cash</option><option value="mobile_money">Mobile money (manual record)</option><option value="card">Card (manual record)</option><option value="bank_transfer">Bank transfer</option></select></label>
+              </div>
+              <label>Reference <input name="reference" placeholder="Optional transaction reference"></label>
+              <button class="button button-primary" type="submit">Save payment</button>
+              <div id="paymentMsg" class="form-message" aria-live="polite"></div>
+            </form>
+            <div class="soft-note">Payments entered here are recorded for bookkeeping only. No money is transferred by this app.</div>
+          </section>
+          <section class="card span-two">
+            <div class="card-heading"><div><div class="eyebrow">ORDER REGISTER</div><h2>All recent orders</h2></div><button class="button button-quiet" id="refreshOrders">Refresh</button></div>
+            <div class="table-wrap" id="ordersTable"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-customers">
+        <div class="page-heading"><div><div class="eyebrow">CUSTOMER RELATIONSHIPS</div><h1>Customers & loyalty</h1><p>Keep customer records and see progress toward repeat-customer rewards.</p></div></div>
+        <div class="content-grid">
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">CUSTOMER PROFILE</div><h2>Register a customer</h2></div></div>
+            <form id="customerForm" class="form-stack">
+              <label>Full name<input name="name" required minlength="2" placeholder="Customer name"></label>
+              <label>Phone number<input name="phone" required placeholder="e.g. 097xxxxxxx"></label>
+              <label>Email <span class="optional">(optional)</span><input name="email" type="email" placeholder="name@example.com"></label>
+              <label class="checkbox-label"><input name="whatsapp_opt_in" type="checkbox" value="true"> Customer agrees to WhatsApp job-completion messages</label>
+              <button class="button button-primary">Save customer</button>
+              <div id="customerMsg" class="form-message" aria-live="polite"></div>
+            </form>
+          </section>
+          <section class="card span-two">
+            <div class="card-heading"><div><div class="eyebrow">CUSTOMER DIRECTORY</div><h2>Registered customers</h2></div><input id="customerSearch" class="search-input" type="search" placeholder="Search name or phone"></div>
+            <div class="table-wrap" id="customersTable"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-documents">
+        <div class="page-heading"><div><div class="eyebrow">DOCUMENT SERVICES</div><h1>Document studio</h1><p>Receive files, extract readable text, request AI editing and download reviewed output.</p></div></div>
+        <div id="aiStatusBanner" class="ai-status-banner" role="status">Checking AI configuration…</div>
+        <div class="content-grid">
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">ASSIGNMENT WRITING</div><h2>Start a draft with AI</h2></div></div>
+            <form id="assignmentForm" class="form-stack">
+              <label>Customer<select name="customer_id" class="customerSelect" required><option value="">Select a customer</option></select></label>
+              <label>Assignment title<input name="title" maxlength="150" required placeholder="e.g. Community health research"></label>
+              <label>Assignment brief<textarea name="brief" minlength="10" maxlength="10000" rows="4" required placeholder="Paste the question, instructions, requirements, and any sources the writer should use."></textarea></label>
+              <label>Target pages <span class="optional">(approximate)</span><input name="requested_pages" type="number" min="1" max="500" placeholder="Optional"></label>
+              <button class="button button-primary">Create &amp; draft with AI</button>
+              <small class="form-help">The brief is sent to your configured OpenAI service. AI drafts are applied and saved automatically; after Undo, click Save changes. Verify facts, citations, and course rules.</small>
+              <div id="assignmentMsg" class="form-message" aria-live="polite"></div>
+            </form>
+          </section>
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">NEW DOCUMENT JOB</div><h2>Upload a document</h2></div><span class="pill pill-blue">Up to 20 MB</span></div>
+            <form id="docForm" class="form-stack">
+              <label>Customer<select name="customer_id" class="customerSelect" required><option value="">Select a customer</option></select></label>
+              <div class="two-col">
+                <label>Target pages <span class="optional">(approx.)</span><input name="requested_pages" type="number" min="1" placeholder="e.g. 5"></label>
+                <label>Job type<select name="job_type"><option value="editing">AI editing</option><option value="summary">Summarising</option><option value="formatting">Formatting</option></select></label>
+              </div>
+              <label class="file-drop">Choose PDF, DOCX or TXT<input name="file" type="file" accept=".pdf,.docx,.txt" required><small>Scanned PDFs need a separate OCR engine.</small></label>
+              <button class="button button-primary">Upload document</button>
+              <div id="docMsg" class="form-message" aria-live="polite"></div>
+            </form>
+          </section>
+          <section class="card span-two">
+            <div class="card-heading"><div><div class="eyebrow">JOB QUEUE</div><h2>Document jobs</h2></div><button class="button button-quiet" id="refreshDocuments">Refresh</button></div>
+            <div class="table-wrap" id="documentsTable"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-shirts">
+        <div class="page-heading"><div><div class="eyebrow">CUSTOM APPAREL</div><h1>T-shirt production</h1><p>Create production orders, collect artwork and track job status.</p></div></div>
+        <div class="content-grid">
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">PRODUCTION REQUEST</div><h2>Create a T-shirt order</h2></div></div>
+            <form id="shirtForm" class="form-stack">
+              <label>Customer<select name="customer_id" class="customerSelect" required><option value="">Select a customer</option></select></label>
+              <div class="two-col"><label>Colour<input name="colour" value="White" required></label><label>Size<select name="size"><option>XS</option><option>S</option><option selected>M</option><option>L</option><option>XL</option><option>XXL</option></select></label></div>
+              <div class="two-col"><label>Quantity<input name="quantity" type="number" min="1" value="1" required></label><label>Price each (K)<input name="unit_price" type="number" min="0" step="0.01" value="50" required></label></div>
+              <label>Artwork file <span class="optional">(optional)</span><input name="design" type="file" accept=".png,.jpg,.jpeg,.pdf,.svg"></label>
+              <label>Production notes<input name="notes" placeholder="Print position, text, or instructions"></label>
+              <button class="button button-primary">Create production order</button>
+              <div id="shirtMsg" class="form-message" aria-live="polite"></div>
+            </form>
+          </section>
+          <section class="card span-two">
+            <div class="card-heading"><div><div class="eyebrow">PRODUCTION QUEUE</div><h2>T-shirt orders</h2></div><button class="button button-quiet" id="refreshShirts">Refresh</button></div>
+            <div class="table-wrap" id="shirtsTable"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-catalogue">
+        <div class="page-heading"><div><div class="eyebrow">SHOP CONFIGURATION</div><h1>Services & pricing</h1><p>Maintain the services and unit prices used across your print shop.</p></div></div>
+        <div class="content-grid">
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">SERVICE CATALOGUE</div><h2>Add a service</h2></div></div>
+            <form id="serviceForm" class="form-stack">
+              <label>Service name<input name="name" required placeholder="e.g. Colour printing"></label>
+              <div class="two-col"><label>Category<input name="category" required placeholder="Printing"></label><label>Unit<input name="unit" value="page" required placeholder="page, job, copy"></label></div>
+              <label>Unit price (K)<input name="unit_price" type="number" min="0" step="0.01" required></label>
+              <button class="button button-primary">Add service</button>
+              <div id="serviceMsg" class="form-message" aria-live="polite"></div>
+            </form>
+          </section>
+          <section class="card span-two">
+            <div class="card-heading"><div><div class="eyebrow">ACTIVE SERVICES</div><h2>Price list</h2></div><button class="button button-quiet" id="refreshServices">Refresh</button></div>
+            <div class="table-wrap" id="servicesTable"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-inventory">
+        <div class="page-heading"><div><div class="eyebrow">STOCK CONTROL</div><h1>Inventory</h1><p>Track stationery products, retail prices and reorder levels.</p></div></div>
+        <div class="content-grid">
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">PRODUCT REGISTER</div><h2>Add a product</h2></div></div>
+            <form id="productForm" class="form-stack">
+              <label>Product name<input name="name" required placeholder="e.g. A4 paper (ream)"></label>
+              <div class="two-col"><label>SKU <span class="optional">(optional)</span><input name="sku"></label><label>Opening quantity<input name="quantity" type="number" min="0" value="0" required></label></div>
+              <div class="two-col"><label>Cost price (K)<input name="cost_price" type="number" min="0" step="0.01" value="0" required></label><label>Selling price (K)<input name="selling_price" type="number" min="0" step="0.01" value="0" required></label></div>
+              <label>Low-stock alert at<input name="reorder_level" type="number" min="0" value="5" required></label>
+              <button class="button button-primary">Add product</button>
+              <div id="productMsg" class="form-message" aria-live="polite"></div>
+            </form>
+          </section>
+          <section class="card span-two">
+            <div class="card-heading"><div><div class="eyebrow">STOCK ON HAND</div><h2>Products</h2></div><button class="button button-quiet" id="refreshProducts">Refresh</button></div>
+            <div class="table-wrap" id="productsTable"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-finance">
+        <div class="page-heading"><div><div class="eyebrow">CASH FLOW</div><h1>Expenses & reports</h1><p>Record operating expenses and review daily and monthly cash activity.</p></div></div>
+        <div class="content-grid">
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">EXPENSE REGISTER</div><h2>Record an expense</h2></div></div>
+            <form id="expenseForm" class="form-stack">
+              <label>Description<input name="description" required placeholder="e.g. Paper stock purchase"></label>
+              <div class="two-col"><label>Amount (K)<input name="amount" type="number" min="0.01" step="0.01" required></label><label>Category<input name="category" value="General"></label></div>
+              <button class="button button-primary">Save expense</button>
+              <div id="expenseMsg" class="form-message" aria-live="polite"></div>
+            </form>
+          </section>
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">TODAY</div><h2>Daily summary</h2></div><button class="button button-quiet" id="refreshDaily">Refresh</button></div>
+            <div id="dailyReport" class="report-summary"></div>
+          </section>
+          <section class="card span-two">
+            <div class="card-heading"><div><div class="eyebrow">MONTHLY PERFORMANCE</div><h2>Cash activity</h2></div><form id="monthForm" class="inline-form"><input name="month" type="month" required><button class="button button-quiet">View</button></form></div>
+            <div id="monthlyReport" class="report-summary"></div>
+          </section>
+          <section class="card span-two">
+            <div class="card-heading"><div><div class="eyebrow">RECENT COSTS</div><h2>Expense history</h2></div><button class="button button-quiet" id="refreshExpenses">Refresh</button></div>
+            <div class="table-wrap" id="expensesTable"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-activity">
+        <div class="page-heading"><div><div class="eyebrow">ACCOUNTABILITY</div><h1>Activity log</h1><p>Review recent recorded changes and transactions.</p></div><button class="button button-quiet" id="refreshAudit">Refresh</button></div>
+        <section class="card"><div class="table-wrap" id="auditTable"></div></section>
+      </section>
+
+      <section class="view" id="view-admin-users">
+        <div class="page-heading"><div><div class="eyebrow">ADMINISTRATION</div><h1>Staff accounts</h1><p>Create staff access and disable accounts when responsibilities change.</p></div></div>
+        <div class="content-grid">
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">TEAM ACCESS</div><h2>Create a staff account</h2></div></div>
+            <form id="staffForm" class="form-stack">
+              <label>Staff member name<input name="name" required minlength="2" placeholder="Full name"></label>
+              <label>Work email<input name="email" type="email" required placeholder="staff@business.com"></label>
+              <label>Temporary password<input name="password" type="password" minlength="12" required placeholder="At least 12 characters"></label>
+              <button class="button button-primary">Create staff account</button>
+              <div id="staffMsg" class="form-message" aria-live="polite"></div>
+            </form>
+            <div class="soft-note">Staff can handle day-to-day shop work but cannot access financial reports or manage user accounts.</div>
+          </section>
+          <section class="card span-two">
+            <div class="card-heading"><div><div class="eyebrow">ACCOUNT DIRECTORY</div><h2>Users & access</h2></div><button class="button button-quiet" id="refreshUsers">Refresh</button></div>
+            <div class="table-wrap" id="usersTable"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-customer">
+        <div class="page-heading"><div><div class="eyebrow">CUSTOMER SELF-SERVICE</div><h1 id="portalGreeting">Your PrintBiz portal</h1><p>Request print work, submit files and keep track of your orders.</p></div></div>
+        <div class="portal-welcome card">
+          <div class="portal-monogram" id="portalMonogram">PB</div>
+          <div class="portal-profile"><strong id="portalName">Customer</strong><small id="portalEmail"></small></div>
+          <div class="portal-loyalty"><small>LOYALTY PROGRESS</small><strong id="portalLoyalty">0 visits · 0% discount</strong><span id="portalPoints">0 points</span></div>
+        </div>
+        <div class="content-grid portal-grid">
+          <section class="card span-two">
+            <div class="card-heading"><div><div class="eyebrow">LIVE JOB UPDATES</div><h2>Your job progress and messages</h2></div><span class="pill pill-blue" id="notificationCount">0 updates</span></div>
+            <div class="job-update-list" id="customerNotifications"></div>
+          </section>
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">PRINT REQUEST</div><h2>Request a quotation</h2></div></div>
+            <form id="portalOrderForm" class="form-stack">
+              <label>Service<select name="service_id" id="portalService" required><option value="">Loading services…</option></select></label>
+              <label>Quantity<input name="quantity" type="number" min="0.01" step="0.01" value="1" required></label>
+              <label>Print file <span class="optional">(optional)</span><input name="file" type="file" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg"></label>
+              <label>Notes <textarea name="notes" rows="2" placeholder="Describe the job or special requirements"></textarea></label>
+              <button class="button button-primary">Submit order request</button>
+              <div id="portalOrderMsg" class="form-message" aria-live="polite"></div>
+            </form>
+            <div class="soft-note">Attach a print-ready file if you have one. The service price is set by the shop.</div>
+          </section>
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">DOCUMENT PROCESSING</div><h2>Send a document</h2></div></div>
+            <form id="portalDocForm" class="form-stack">
+              <div class="two-col"><label>Target pages <span class="optional">(approx.)</span><input name="requested_pages" type="number" min="1" placeholder="Optional"></label><label>Request type<select name="job_type"><option value="editing">AI editing</option><option value="summary">Summarising</option><option value="formatting">Formatting</option></select></label></div>
+              <label>Document file<input name="file" type="file" accept=".pdf,.docx,.txt" required></label>
+              <button class="button button-primary">Upload document</button>
+              <div id="portalDocMsg" class="form-message" aria-live="polite"></div>
+            </form>
+          </section>
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">APPAREL PRINTING</div><h2>Request T-shirt printing</h2></div></div>
+            <form id="portalShirtForm" class="form-stack">
+              <div class="two-col"><label>Colour<input name="colour" value="White" required></label><label>Size<select name="size"><option>XS</option><option>S</option><option selected>M</option><option>L</option><option>XL</option><option>XXL</option></select></label></div>
+              <label>Quantity<input name="quantity" type="number" min="1" value="1" required></label>
+              <label>Design file <span class="optional">(optional)</span><input name="design" type="file" accept=".png,.jpg,.jpeg,.pdf,.svg"></label>
+              <label>Notes<input name="notes" placeholder="Print position or design instructions"></label>
+              <button class="button button-primary">Request a T-shirt quote</button>
+              <div id="portalShirtMsg" class="form-message" aria-live="polite"></div>
+            </form>
+          </section>
+          <section class="card span-two">
+            <div class="card-heading"><div><div class="eyebrow">YOUR ACCOUNT</div><h2>Order history</h2></div><button class="button button-quiet" id="refreshPortal">Refresh</button></div>
+            <div class="table-wrap" id="portalOrders"></div>
+          </section>
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">YOUR FILES</div><h2>Document jobs</h2></div></div>
+            <div class="table-wrap" id="portalDocuments"></div>
+          </section>
+          <section class="card">
+            <div class="card-heading"><div><div class="eyebrow">YOUR APPAREL</div><h2>T-shirt requests</h2></div></div>
+            <div class="table-wrap" id="portalShirts"></div>
+          </section>
+        </div>
+      </section>
+
+      <footer class="app-footer"><span>PrintBiz AI</span> · Business operations workspace <span class="footer-divider">|</span> Protect customer data and configure integrations before public deployment.</footer>
+    </div>
+  </main>
+</div>
+<dialog id="paymentDialog" class="modal">
+  <form method="dialog" class="modal-close"><button class="icon-button" aria-label="Close">×</button></form>
+  <div class="eyebrow">RECORD PAYMENT</div><h2 id="paymentDialogTitle">Order payment</h2>
+  <form id="quickPaymentForm" class="form-stack">
+    <input type="hidden" name="order_id">
+    <label>Amount (K)<input name="amount" type="number" min="0.01" step="0.01" required></label>
+    <label>Method<select name="method"><option value="cash">Cash</option><option value="mobile_money">Mobile money (manual record)</option><option value="card">Card (manual record)</option><option value="bank_transfer">Bank transfer</option></select></label>
+    <label>Reference <input name="reference" placeholder="Optional transaction reference"></label>
+    <button class="button button-primary">Save payment</button><div class="form-message" aria-live="polite"></div>
+  </form>
+</dialog>
+<dialog id="previewDialog" class="modal preview-modal">
+  <form method="dialog" class="modal-close"><button class="icon-button" aria-label="Close">×</button></form>
+  <div class="eyebrow">DOCUMENT PREVIEW</div><h2 id="previewTitle">Edited document</h2>
+  <pre id="previewText" class="document-preview"></pre>
+  <a id="downloadEdited" class="button button-primary download-link" href="#">Download edited file</a>
+</dialog>
+<dialog id="jobHistoryDialog" class="modal job-history-dialog">
+  <form method="dialog" class="modal-close"><button class="icon-button" aria-label="Close">×</button></form>
+  <div class="eyebrow">JOB ACTIVITY</div>
+  <h2 id="jobHistoryTitle">Job progress</h2>
+  <div class="job-update-list" id="jobHistoryList"></div>
+</dialog>
+<dialog id="documentEditorDialog" class="document-editor-dialog">
+  <form method="dialog" class="modal-close"><button class="icon-button" aria-label="Close">×</button></form>
+  <header class="word-header">
+    <div><div class="eyebrow">DOCUMENT STUDIO</div><h2 id="editorFilename">Untitled document</h2></div>
+    <div class="word-actions">
+      <button class="button button-quiet" id="editorUndo" type="button" title="Undo">↶ Undo</button>
+      <button class="button button-quiet" id="editorRedo" type="button" title="Redo">↷ Redo</button>
+      <button class="button button-quiet" id="editorDownloadWord" type="button">Download Word</button>
+      <button class="button button-primary" id="editorSave" type="button">Save changes</button>
+    </div>
+  </header>
+  <div class="word-ribbon" aria-label="Editor appearance">
+    <label>Font
+      <select id="editorFont"><option value="Arial">Arial</option><option value="Calibri">Calibri</option><option value="Georgia">Georgia</option><option value="Times New Roman">Times New Roman</option><option value="Verdana">Verdana</option></select>
+    </label>
+    <label>Size
+      <select id="editorFontSize"><option>10</option><option selected>11</option><option>12</option><option>14</option><option>16</option><option>18</option></select>
+    </label>
+    <span class="word-ribbon-note">Plain text · formatting is for comfortable reading and print preview</span>
+  </div>
+  <section class="editor-ai-panel" aria-label="AI assignment assistant">
+    <div class="editor-ai-controls">
+      <label>AI action
+        <select id="editorAIAction">
+          <option value="coach">Coach and improve this draft</option>
+          <option value="draft">Draft from assignment brief</option>
+        </select>
+      </label>
+      <textarea id="editorAIInstruction" rows="2" maxlength="10000" placeholder="Tell the AI what you need. For a draft, paste the complete assignment brief here."></textarea>
+      <button class="button button-primary" id="editorAIApply" type="button">Ask AI &amp; apply</button>
+    </div>
+    <small id="editorAIStatus">Assignment text is sent to your configured OpenAI service. AI edits are saved automatically; after Undo, click Save changes to persist the restored text.</small>
+  </section>
+  <div class="word-page-wrap">
+    <textarea id="documentEditorText" aria-label="Document text" spellcheck="true" placeholder="Document text will appear here."></textarea>
+  </div>
+  <footer class="word-statusbar"><span id="editorWordCount">0 words</span><span>Saved document exports as Microsoft Word (.docx)</span></footer>
+  <div id="editorMessage" class="form-message" aria-live="polite"></div>
+</dialog>
+<dialog id="passwordDialog" class="modal">
+  <form method="dialog" class="modal-close"><button class="icon-button" aria-label="Close">×</button></form>
+  <div class="eyebrow">ACCOUNT SECURITY</div><h2>Change password</h2>
+  <form id="passwordForm" class="form-stack">
+    <label>Current password<input name="current_password" type="password" autocomplete="current-password" required></label>
+    <label>New password<input name="new_password" type="password" autocomplete="new-password" minlength="12" required></label>
+    <label>Confirm new password<input name="confirm_password" type="password" autocomplete="new-password" minlength="12" required></label>
+    <button class="button button-primary">Update password</button>
+    <div class="form-message" aria-live="polite"></div>
+  </form>
+</dialog>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

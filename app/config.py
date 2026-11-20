@@ -1,0 +1,17 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
+BUSINESS_NAME = os.getenv("BUSINESS_NAME", "PrintBiz AI")
+CURRENCY = os.getenv("CURRENCY", "ZMW")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./printbiz.db")
+UPLOAD_DIR = os.getenv("UPLOAD_DIR", "uploads")
+SESSION_SECRET = os.getenv("SESSION_SECRET", "")
+SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "false").lower() == "true"
+SESSION_TTL_SECONDS = int(os.getenv("SESSION_TTL_SECONDS", "28800"))
+WHATSAPP_ACCESS_TOKEN = os.getenv("WHATSAPP_ACCESS_TOKEN", "")
+WHATSAPP_PHONE_NUMBER_ID = os.getenv("WHATSAPP_PHONE_NUMBER_ID", "")
+WHATSAPP_API_VERSION = os.getenv("WHATSAPP_API_VERSION", "")
+WHATSAPP_TEMPLATE_NAME = os.getenv("WHATSAPP_TEMPLATE_NAME", "printbiz_job_completed")
+WHATSAPP_TEMPLATE_LANGUAGE = os.getenv("WHATSAPP_TEMPLATE_LANGUAGE", "en")

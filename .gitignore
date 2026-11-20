@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+printbiz.db
+*.db-shm
+*.db-wal
+uploads/
+.env
+.env.*
+!.env.example

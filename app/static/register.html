@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>Create account | PrintBiz AI</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body data-auth-mode="register">
+<main class="auth-screen">
+  <section class="auth-hero">
+    <div class="auth-hero-copy">
+      <a class="brand auth-brand" href="/login" aria-label="PrintBiz AI">
+        <span class="brand-mark">P</span>
+        <span><strong>PRINTBIZ<span class="brand-accent"> AI</span></strong><small>INTELLIGENT PRINT SHOP</small></span>
+      </a>
+      <div class="auth-hero-message">
+        <div class="eyebrow">YOUR BUSINESS, IN SYNC</div>
+        <h1>Print it.<br>Track every step.</h1>
+        <p>Request printing, custom T-shirts and document services, then follow each job through production.</p>
+        <div class="auth-role-chips"><span>PRINTING</span><span>DOCUMENTS</span><span>APPAREL</span></div>
+      </div>
+      <div class="auth-hero-footer">PrintBiz AI <span>·</span> Stationery & printing management</div>
+    </div>
+  </section>
+  <section class="auth-side">
+    <div class="auth-card">
+      <div class="eyebrow">CUSTOMER PORTAL</div>
+      <h2>Create your account</h2>
+      <p>Register to request services and track your print jobs.</p>
+      <form id="registerForm" class="form-stack auth-form">
+        <label>Your name<input name="name" autocomplete="name" minlength="2" required placeholder="Full name"></label>
+        <label>Phone number<input name="phone" autocomplete="tel" minlength="5" required placeholder="Contact phone"></label>
+        <label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+        <label>Create password<input name="password" type="password" autocomplete="new-password" minlength="12" required placeholder="At least 12 characters"></label>
+        <label class="checkbox-label"><input name="whatsapp_updates" type="checkbox" value="true"> I agree to receive WhatsApp messages when my jobs are complete</label>
+        <button class="button button-primary">Create customer account</button>
+        <div class="form-message" aria-live="polite"></div>
+      </form>
+      <p class="auth-switch">Already registered? <a href="/login">Sign in</a></p>
+    </div>
+    <div class="auth-security">Your customer account only shows your own requests and job updates.</div>
+  </section>
+</main>
+<script src="/static/auth.js"></script>
+</body>
+</html>

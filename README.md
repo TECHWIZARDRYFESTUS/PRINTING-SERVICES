@@ -1,0 +1,81 @@
+# PrintBiz AI
+
+A runnable full-stack starter for a stationery, document-processing, printing and T-shirt business.
+
+## Included working modules
+- Responsive operator dashboard with navigation for daily workflows
+- Separate `/login`, `/register` and `/dashboard` pages
+- Customer registration and visit tracking
+- Secure sign-in and separate administrator, staff and customer workspaces
+- Admin-managed staff accounts and per-role API permissions
+- Customer print-file requests, T-shirt quote approval, document uploads and private history
+- Staff print-job queue with step-by-step production statuses and T-shirt quoting/production workflow
+- Customer-visible job timelines and in-app progress updates for print, document and T-shirt jobs
+- Plain-text document editor with a paper-like workspace, editing controls and Word (.docx) export
+- Optional WhatsApp completion messages, sent only with explicit customer consent
+- Loyalty discounts based on completed visits
+- Service catalogue and configurable prices
+- Multi-line quotations, order totals and printable receipts
+- Cash, mobile-money, card and bank-transfer payment recording (manual bookkeeping only)
+- Product inventory and stock movements
+- Low-stock indicators and inventory alerts
+- Expense recording and daily/monthly cash summaries
+- Document upload and editable job workflow
+- Document text extraction for TXT and DOCX; PDF extraction when `pypdf` is installed
+- AI assignment drafting and coaching through OpenAI (requires an API key)
+- T-shirt order, quote, production status and design download workflow
+- Dashboard, order register and activity log
+- SQLite database and audit log
+
+## Requirements
+- Python 3.13.15 for the Render deployment (local development supports Python 3.11+)
+- Optional: OpenAI API key for AI-assisted editing
+- Dependencies are listed in `requirements.txt`
+
+## Run locally (Windows PowerShell)
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+Copy-Item .env.example .env
+python -m app.create_admin
+python -m uvicorn app.main:app --reload
+```
+Open http://127.0.0.1:8000/login. Customer registration is at `/register`; after signing in, the dashboard is at `/dashboard`.
+
+The app creates `printbiz.db` automatically and seeds example services/products on first run.
+Set a long, random `SESSION_SECRET` in `.env` before using persistent sessions. `SESSION_COOKIE_SECURE=false` is for local HTTP only; set it to `true` behind HTTPS. The first administrator is created interactively with `python -m app.create_admin`; admins can then create staff accounts. Customers can self-register from the sign-in page.
+
+## Optional AI setup
+Set `OPENAI_API_KEY` privately in `.env` for local development or in the Render service Environment settings. The Render Blueprint prompts for this secret and uses `OPENAI_MODEL` (`gpt-4.1-mini` by default). Never commit the key or put it in frontend JavaScript.
+
+The Document Studio supports creating an assignment draft from a customer brief and coaching/revising text in the editor. When you request an AI action, the relevant brief and document text are sent to the configured OpenAI service. AI actions replace and save the current editor text automatically; after Undo, click **Save changes** to persist the restored version. A configured key is required. Without one, the app clearly reports that AI is unavailable rather than returning a fake demo result. Always verify facts and citations and follow the course's AI-use policy; the assistant does not invent references.
+
+## Optional WhatsApp completion messages
+
+The app always records completion in the customer's portal. To also send a WhatsApp message:
+
+1. Set up a Meta WhatsApp Business Cloud API phone number and create/approve a **utility** message template named `printbiz_job_completed` in the configured language.
+2. The template body must include three text placeholders in this order: customer name (`{{1}}`), job type (`{{2}}`), and job number (`{{3}}`). For example: `Hi {{1}}, your {{2}} job #{{3}} is complete and ready for collection. Thank you for choosing us.`
+3. Configure `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, and `WHATSAPP_API_VERSION` in the deployment environment. The API version must be a currently supported Meta Graph API version. Optionally set `WHATSAPP_TEMPLATE_NAME` and `WHATSAPP_TEMPLATE_LANGUAGE` if your approved template uses different values.
+4. Customers must explicitly opt in to WhatsApp updates during registration (or when staff creates their customer profile), and their phone number must use international `+` format.
+
+On Render, set the three credentials/version variables in the service's Environment settings; the Blueprint intentionally does not store secrets. A missing configuration, missing consent, or failed delivery does not block job completion: the customer still sees the in-app update, and staff/admins can inspect the delivery result in the job timeline and activity log. Never commit or share the access token.
+
+## Deploy to Render
+
+The project is prepared as a Render Blueprint in `render.yaml`. Before deploying:
+
+1. Push the project to a GitHub repository. Keep `.env`, the local database, and uploaded files out of Git; `.gitignore` excludes them.
+2. In Render, select **New → Blueprint**, connect the repository, and apply the `printbiz-ai` service from `render.yaml`.
+3. The Blueprint pins Python to the tested version in `.python-version`, runs `pip install -r requirements.txt`, starts Uvicorn on Render's `$PORT`, and checks `/api/health`.
+4. The service uses a Starter web plan and a persistent disk mounted at `/var/data`. SQLite and uploaded files are stored there. Keep this service to one instance; multiple instances must not share this SQLite database.
+5. In the Render service's **Environment** settings, add `OPENAI_API_KEY` if you want live AI. Add the WhatsApp Cloud API variables only if you have the Meta phone number, approved template, and customer consent configured. Secrets are not stored in the Blueprint or repository. The app starts without optional integrations, but those features will report unavailable until configured.
+6. Wait for the first deploy to finish. In the service Shell, run `python -m app.create_admin` and follow the prompts to create the first administrator. Then sign in at `/login`; customers can register at `/register`, and administrators create staff accounts.
+
+The Blueprint generates `SESSION_SECRET` and enables secure cookies for HTTPS. Configure backups for `/var/data`; persistent disks are not a substitute for backups. Check the service's `/api/health` endpoint after deploy and verify sign-in, customer registration, and a test job before using real customer data.
+
+## Feature boundaries and production requirements
+The current app includes role-checked admin, staff and customer panels, but is not yet a complete production platform. It does not yet include supplier or employee management, OCR for scanned files, document conversion, AI image generation, printer control, automated backup/restore, or tax configuration. Customer email/phone ownership is not verified. Monthly and daily cash summaries are not full profit-and-loss statements: cost of goods, tax and other overhead are not included.
+
+Before using with real customer data or money, deploy behind HTTPS, configure backup/restore procedures, a privacy and retention policy, malware scanning for uploads, tested database migrations, automated tests, account verification and required integrations. Payment methods in the app are labels for manual payment recording; the app does not charge MTN/Airtel Money, cards or bank accounts.
