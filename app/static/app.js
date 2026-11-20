@@ -288,13 +288,20 @@ function renderOrders() {
 async function loadProducts() {
   state.products = await api("/api/products");
   $("#productsTable").innerHTML = tableMarkup(
-    ["Product", "SKU", "On hand", "Reorder at", "Cost", "Retail", "Stock"],
+    ["Product", "SKU", "On hand", "Reorder at", "Cost", "Retail", "Stock", ...(state.user?.role === "admin" ? ["Save prices"] : [])],
     state.products.map(product => `<tr>
       <td><strong>${escapeHtml(product.name)}</strong></td><td>${escapeHtml(product.sku || "—")}</td>
       <td><span class="${product.quantity <= product.reorder_level ? "stock-low" : ""}">${product.quantity}</span></td>
-      <td>${product.reorder_level}</td><td>${money(product.cost_price)}</td><td>${money(product.selling_price)}</td>
+      <td>${product.reorder_level}</td>
+      <td>${state.user?.role === "admin"
+        ? `<input class="price-input" type="number" min="0" step="0.01" value="${product.cost_price}" data-product-cost="${product.id}" aria-label="Cost price for ${escapeHtml(product.name)}">`
+        : money(product.cost_price)}</td>
+      <td>${state.user?.role === "admin"
+        ? `<input class="price-input" type="number" min="0" step="0.01" value="${product.selling_price}" data-product-selling="${product.id}" aria-label="Selling price for ${escapeHtml(product.name)}">`
+        : money(product.selling_price)}</td>
       <td class="stock-actions"><button class="table-action" data-stock="${product.id}" data-change="1" aria-label="Add one to stock">＋</button>
       <button class="table-action" data-stock="${product.id}" data-change="-1" aria-label="Remove one from stock">−</button></td>
+      ${state.user?.role === "admin" ? `<td><button class="table-action" data-save-product-price="${product.id}">Save</button></td>` : ""}
     </tr>`),
     "No products yet. Add your stock items using the product form."
   );
@@ -308,8 +315,14 @@ async function loadProducts() {
 async function loadServices() {
   state.services = await api("/api/services");
   $("#servicesTable").innerHTML = tableMarkup(
-    ["Service", "Category", "Unit", "Unit price"],
-    state.services.map(service => `<tr><td><strong>${escapeHtml(service.name)}</strong></td><td>${escapeHtml(service.category)}</td><td>${escapeHtml(service.unit)}</td><td>${money(service.unit_price)}</td></tr>`),
+    ["Service", "Category", "Unit", "Unit price", ...(state.user?.role === "admin" ? [""] : [])],
+    state.services.map(service => `<tr>
+      <td><strong>${escapeHtml(service.name)}</strong></td><td>${escapeHtml(service.category)}</td><td>${escapeHtml(service.unit)}</td>
+      <td>${state.user?.role === "admin"
+        ? `<input class="price-input" type="number" min="0" step="0.01" value="${service.unit_price}" data-service-price="${service.id}" aria-label="Unit price for ${escapeHtml(service.name)}">`
+        : money(service.unit_price)}</td>
+      ${state.user?.role === "admin" ? `<td><button class="table-action" data-save-service-price="${service.id}">Save</button></td>` : ""}
+    </tr>`),
     "No active services are configured."
   );
 }
@@ -722,6 +735,31 @@ $("#serviceForm").addEventListener("submit", async event => {
   }
 });
 
+$("#servicesTable").addEventListener("click", async event => {
+  const button = event.target.closest("[data-save-service-price]");
+  if (!button) return;
+  const serviceId = button.dataset.saveServicePrice;
+  const price = Number($(`[data-service-price="${serviceId}"]`).value);
+  if (!Number.isFinite(price) || price < 0) {
+    notify("Enter a valid non-negative service price.", true);
+    return;
+  }
+  button.disabled = true;
+  try {
+    await api(`/api/services/${serviceId}/price`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ unit_price: price })
+    });
+    notify("Service price updated.");
+    await loadServices();
+  } catch (error) {
+    notify(error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
 $("#productForm").addEventListener("submit", async event => {
   event.preventDefault();
   const form = event.currentTarget;
@@ -739,6 +777,31 @@ $("#productForm").addEventListener("submit", async event => {
 });
 
 $("#productsTable").addEventListener("click", async event => {
+  const priceButton = event.target.closest("[data-save-product-price]");
+  if (priceButton) {
+    const productId = priceButton.dataset.saveProductPrice;
+    const costPrice = Number($(`[data-product-cost="${productId}"]`).value);
+    const sellingPrice = Number($(`[data-product-selling="${productId}"]`).value);
+    if (!Number.isFinite(costPrice) || costPrice < 0 || !Number.isFinite(sellingPrice) || sellingPrice < 0) {
+      notify("Enter valid non-negative cost and selling prices.", true);
+      return;
+    }
+    priceButton.disabled = true;
+    try {
+      await api(`/api/products/${productId}/price`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cost_price: costPrice, selling_price: sellingPrice })
+      });
+      notify("Product prices updated.");
+      await loadProducts();
+    } catch (error) {
+      notify(error.message, true);
+    } finally {
+      priceButton.disabled = false;
+    }
+    return;
+  }
   const button = event.target.closest("[data-stock]");
   if (!button) return;
   const formData = new FormData();

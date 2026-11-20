@@ -13,6 +13,9 @@ class ServiceIn(BaseModel):
     unit: str = "job"
     unit_price: float = Field(ge=0)
 
+class ServicePriceIn(BaseModel):
+    unit_price: float = Field(ge=0)
+
 class ProductIn(BaseModel):
     name: str
     sku: Optional[str] = None
@@ -20,6 +23,10 @@ class ProductIn(BaseModel):
     reorder_level: int = Field(default=5, ge=0)
     cost_price: float = Field(default=0, ge=0)
     selling_price: float = Field(default=0, ge=0)
+
+class ProductPriceIn(BaseModel):
+    cost_price: float = Field(ge=0)
+    selling_price: float = Field(ge=0)
 
 class OrderLineIn(BaseModel):
     description: str

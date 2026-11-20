@@ -374,6 +374,21 @@ def add_service(data:schemas.ServiceIn, db:Session=Depends(get_db), user: models
     audit(db,"service.created",f"service_id={s.id}")
     return s
 
+@app.patch("/api/services/{service_id}/price")
+def update_service_price(
+    service_id: int,
+    data: schemas.ServicePriceIn,
+    db: Session=Depends(get_db),
+    user: models.User=Depends(require_roles("admin")),
+):
+    service = db.get(models.Service, service_id)
+    if not service:
+        raise HTTPException(404, "Service not found.")
+    service.unit_price = data.unit_price
+    db.commit()
+    audit(db, "service.price_updated", f"service_id={service.id}, unit_price={service.unit_price}")
+    return {"service_id": service.id, "unit_price": service.unit_price}
+
 @app.get("/api/products")
 def products(db:Session=Depends(get_db), user: models.User=Depends(require_roles("admin","staff"))):
     return db.query(models.Product).filter_by(active=True).all()
@@ -385,6 +400,30 @@ def add_product(data:schemas.ProductIn, db:Session=Depends(get_db), user: models
     p=models.Product(**data.model_dump()); db.add(p); db.commit(); db.refresh(p)
     audit(db,"product.created",f"product_id={p.id}")
     return p
+
+@app.patch("/api/products/{product_id}/price")
+def update_product_price(
+    product_id: int,
+    data: schemas.ProductPriceIn,
+    db: Session=Depends(get_db),
+    user: models.User=Depends(require_roles("admin")),
+):
+    product = db.get(models.Product, product_id)
+    if not product:
+        raise HTTPException(404, "Product not found.")
+    product.cost_price = data.cost_price
+    product.selling_price = data.selling_price
+    db.commit()
+    audit(
+        db,
+        "product.price_updated",
+        f"product_id={product.id}, cost_price={product.cost_price}, selling_price={product.selling_price}",
+    )
+    return {
+        "product_id": product.id,
+        "cost_price": product.cost_price,
+        "selling_price": product.selling_price,
+    }
 
 @app.post("/api/products/{product_id}/stock")
 def adjust_stock(product_id:int, quantity:int=Form(...), db:Session=Depends(get_db), user: models.User=Depends(require_roles("admin","staff"))):
